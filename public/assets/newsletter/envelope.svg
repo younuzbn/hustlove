@@ -1,0 +1,41 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="400" height="270" viewBox="0 0 400 270" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Envelope" clip-path="url(#clip0_0_24)">
+<path id="Body" d="M0 12C0 4 4 0 12 0H388C396 0 400 4 400 12V258C400 266 396 270 388 270H12C4 270 0 266 0 258V12Z" fill="url(#paint0_linear_0_24)"/>
+<path id="Bottom fold" d="M0 270L190 138C196.667 133.333 203.333 133.333 210 138L400 270H0Z" fill="url(#paint1_linear_0_24)"/>
+<path id="Fold lines" d="M0 270L190 138C196.667 133.333 203.333 133.333 210 138L400 270" stroke="white" stroke-opacity="0.3" stroke-width="1"/>
+<path id="Bottom edge" d="M0 269H400" stroke="#073A82" stroke-width="2"/>
+<path id="Flap shadow" d="M0 18C0 10 4 6 12 6H388C396 6 400 10 400 18V16C400 22.6667 396.4 28.9667 389.2 34.9L224.7 169.7C208.233 183.233 191.767 183.233 175.3 169.7L10.8 34.9C3.6 28.9667 0 22.6667 0 16V18Z" fill="#073A82" fill-opacity="0.4"/>
+<g id="Flap">
+<path d="M0 12C0 4 4 0 12 0H388C396 0 400 4 400 12V10C400 16.6667 396.4 22.9667 389.2 28.9L224.7 163.7C208.233 177.233 191.767 177.233 175.3 163.7L10.8 28.9C3.6 22.9667 0 16.6667 0 10V12Z" fill="url(#paint2_linear_0_24)"/>
+</g>
+<path id="Flap edge" d="M400 9.25C400 15.9167 396.4 22.2167 389.2 28.15L224.7 162.95C208.233 176.483 191.767 176.483 175.3 162.95L10.8 28.15C3.6 22.2167 0 15.9167 0 9.25" stroke="#BFD6F6" stroke-width="4"/>
+<path id="Flap highlight" d="M400 9.25C400 15.9167 396.4 22.2167 389.2 28.15L224.7 162.95C208.233 176.483 191.767 176.483 175.3 162.95L10.8 28.15C3.6 22.2167 0 15.9167 0 9.25" stroke="white" stroke-opacity="0.5" stroke-width="1"/>
+<g id="Seal">
+<circle cx="200" cy="158" r="24" fill="#073A82" fill-opacity="0.35" transform="translate(0 3)"/>
+<circle cx="200" cy="158" r="24" fill="#0A4DA6" stroke="#8DBAF0" stroke-width="2"/>
+<g id="Kelder mark" transform="translate(189 147)">
+<path d="M7 1H3C1.89543 1 1 1.89543 1 3V19C1 20.1046 1.89543 21 3 21H7C8.10457 21 9 20.1046 9 19V3C9 1.89543 8.10457 1 7 1Z" fill="white"/>
+<path d="M19 1H15C13.8954 1 13 1.89543 13 3V7C13 8.10457 13.8954 9 15 9H19C20.1046 9 21 8.10457 21 7V3C21 1.89543 20.1046 1 19 1Z" fill="white"/>
+<path d="M19 13H15C13.8954 13 13 13.8954 13 15V19C13 20.1046 13.8954 21 15 21H19C20.1046 21 21 20.1046 21 19V15C21 13.8954 20.1046 13 19 13Z" fill="#DDF545"/>
+</g>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_24" x1="0" y1="0" x2="0" y2="270" gradientUnits="userSpaceOnUse">
+<stop stop-color="#3F8DE8"/>
+<stop offset="0.55" stop-color="#0A4DA6"/>
+<stop offset="1" stop-color="#073A82"/>
+</linearGradient>
+<linearGradient id="paint1_linear_0_24" x1="0" y1="131" x2="0" y2="270" gradientUnits="userSpaceOnUse">
+<stop stop-color="#3F8DE8" stop-opacity="0.5"/>
+<stop offset="1" stop-color="#3F8DE8" stop-opacity="0"/>
+</linearGradient>
+<linearGradient id="paint2_linear_0_24" x1="0" y1="0" x2="0" y2="184" gradientUnits="userSpaceOnUse">
+<stop stop-color="#8DBAF0"/>
+<stop offset="1" stop-color="#5C9BE6"/>
+</linearGradient>
+<clipPath id="clip0_0_24">
+<rect width="400" height="270" fill="white"/>
+</clipPath>
+</defs>
+</svg>

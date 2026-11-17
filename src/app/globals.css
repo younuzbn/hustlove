@@ -1,0 +1,670 @@
+/* `source("../")` limits class detection to `src/` (this file lives in src/app).
+   Without it Tailwind v4 scans the whole repo — including obsidian/ and .claude/,
+   where documented class *patterns* like duration-[var(--duration-*)] parse as
+   real candidates and emit CSS warnings. Docs are not a source of utilities. */
+@import "tailwindcss" source("../");
+
+/* Kelder breakpoints: the 1440 frame is the base; `to-laptop:` applies the 1024
+   frame (5934:3133) at 1024px and below. */
+/* Hover only on desktop with a real pointer — touch/tablet/phone (≤1024) never get hover styles. */
+@custom-variant hover {
+  @media (hover: hover) and (min-width: 1025px) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
+@custom-variant to-laptop (@media (width <= 1024px));
+/* `to-tablet:` applies the 768 frame (5934:10453) at 768px and below. Declared
+   after to-laptop so it wins where both match. */
+@custom-variant to-tablet (@media (width <= 768px));
+/* `to-phone:` applies the 390 frame (5934:17765) at 560px and below — between
+   561 and 768 the 768 layout scales down. Declared last so it wins. */
+@custom-variant to-phone (@media (width <= 560px));
+
+/* ---------------------------------------------------------------------------
+   TIER 1 — PRIMITIVES  (`--raw-*`)
+   Raw literal values. The only tier allowed to contain a hex/px/ms literal.
+   Never referenced in markup, never bound into @theme. Rename freely.
+   Grammar: --raw-<category>-<name>[-<shade>]
+   See obsidian/frontend/design-system.md → "Token naming convention".
+   --------------------------------------------------------------------------- */
+:root {
+  --raw-color-white: #ffffff;
+  --raw-color-neutral-100: #ededed;
+  --raw-color-neutral-900: #171717;
+  --raw-color-neutral-950: #0a0a0a;
+
+  /* Kelder palette — Figma WINXFW2nTM7zYwd5dGgm1T, frame 5628:5219 "Kelder — Home". */
+  --raw-color-ink-950: #06142e;
+  --raw-color-slate-600: #55667f;
+  --raw-color-slate-400: #9aa8bd;
+  --raw-color-mist-50: #f5f8fc;
+  --raw-color-mist-100: #f1f5fb;
+  --raw-color-mist-200: #dde5f0;
+  --raw-color-mist-400: #9fb3d1;
+  --raw-color-sky-200: #c9d9f0;
+  --raw-color-sky-300: #a9bcda;
+  --raw-color-blue-100: #d0e1f8;
+  --raw-color-blue-200: #bfd6f6;
+  --raw-color-blue-300: #8dbaf0;
+  --raw-color-blue-400: #5c9be6;
+  --raw-color-blue-500: #2f74d0;
+  --raw-color-blue-600: #1257b5;
+  --raw-color-blue-350: #6fa4e8;
+  --raw-color-blue-250: #9cc6f5;
+  --raw-color-blue-700: #0a4da6;
+  --raw-color-navy-800: #0a3578;
+  --raw-color-navy-deep: #082a62;
+  --raw-color-lime-300: #ddf545;
+
+  /* Kelder surfaces — gradients copied from the Figma fills. */
+  --raw-gradient-hero: linear-gradient(180deg, rgb(2 11 30) 0%, rgb(4 32 90) 17%, rgb(10 77 166) 34%, rgb(63 141 232) 49%, rgb(156 198 245) 62%, rgb(215 232 251) 74%, rgb(245 248 252) 88%);
+  --raw-gradient-dashboard: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(174.51deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  --raw-gradient-recall: radial-gradient(ellipse 90% 80% at 100% 0%, rgb(111 168 236 / 0.4) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(161.29deg, rgb(14 69 154) 7.735%, rgb(10 53 120) 58.453%, rgb(8 42 98) 92.265%);
+  /* Instrument tiles: site blues (security card's 500 → 700 base, blue-300/400 sheens) so the
+     white pixel art reads strongly. */
+  --raw-gradient-bills: radial-gradient(ellipse 90% 90% at 88% 8%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 60%), radial-gradient(ellipse 80% 80% at 6% 50%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(165.37deg, rgb(63 141 232) 8.4861%, rgb(47 116 208) 45.849%, rgb(10 77 166) 91.514%);
+  --raw-gradient-funds: radial-gradient(ellipse 90% 90% at 80% 12%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 58%), radial-gradient(ellipse 70% 90% at 0% 60%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(172.79deg, rgb(63 141 232) 6.1733%, rgb(47 116 208) 41.235%, rgb(10 77 166) 93.827%);
+  --raw-gradient-overnight: radial-gradient(ellipse 90% 90% at 92% 14%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 55%), radial-gradient(ellipse 80% 80% at 10% 38%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(157.5deg, rgb(63 141 232) 7.735%, rgb(47 116 208) 50%, rgb(10 77 166) 92.265%);
+  --raw-gradient-steps: radial-gradient(ellipse 60% 70% at 0% 0%, rgb(141 186 240 / 0.75) 0%, rgb(116 172 237 / 0.55) 20%, rgb(96 160 235 / 0.45) 30%, rgb(63 141 232 / 0.35) 40%, rgb(63 141 232 / 0) 72%), radial-gradient(ellipse 55% 60% at 100% 100%, rgb(47 116 208 / 0.55) 0%, rgb(47 116 208 / 0) 70%), linear-gradient(180deg, rgb(11 58 130) 0%, rgb(8 42 98) 100%);
+  --raw-gradient-bar: linear-gradient(180deg, rgb(29 95 191) 0%, rgb(10 77 166) 55%, rgb(7 58 130) 100%); /* dark chart bars */
+  --raw-gradient-security: linear-gradient(166.36deg, rgb(63 141 232) 8.4861%, rgb(10 77 166) 54.151%, rgb(7 58 130) 91.514%);
+  --raw-gradient-newsletter: radial-gradient(ellipse 90% 90% at 88% 8%, rgb(241 245 254) 0%, rgb(241 245 254 / 0) 60%), radial-gradient(ellipse 80% 80% at 6% 50%, rgb(220 231 251) 0%, rgb(220 231 251 / 0) 55%), linear-gradient(164.32deg, rgb(143 181 247) 8.4861%, rgb(169 198 248) 45.849%, rgb(108 157 243) 91.514%);
+  /* 1024 frame (5934:3133): same stops, angles re-derived by Figma for the box ratio. */
+  --raw-gradient-dashboard-md: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(168.92deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  --raw-gradient-recall-md: radial-gradient(ellipse 90% 80% at 100% 0%, rgb(111 168 236 / 0.4) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(151.17deg, rgb(14 69 154) 7.735%, rgb(10 53 120) 58.453%, rgb(8 42 98) 92.265%);
+  --raw-gradient-bills-md: radial-gradient(ellipse 90% 90% at 88% 8%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 60%), radial-gradient(ellipse 80% 80% at 6% 50%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(158.93deg, rgb(63 141 232) 8.4861%, rgb(47 116 208) 45.849%, rgb(10 77 166) 91.514%);
+  --raw-gradient-funds-md: radial-gradient(ellipse 90% 90% at 80% 12%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 58%), radial-gradient(ellipse 70% 90% at 0% 60%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(169.39deg, rgb(63 141 232) 6.1733%, rgb(47 116 208) 41.235%, rgb(10 77 166) 93.827%);
+  --raw-gradient-overnight-md: radial-gradient(ellipse 90% 90% at 92% 14%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 55%), radial-gradient(ellipse 80% 80% at 10% 38%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(148.57deg, rgb(63 141 232) 7.735%, rgb(47 116 208) 50%, rgb(10 77 166) 92.265%);
+  --raw-gradient-security-md: linear-gradient(159.43deg, rgb(63 141 232) 8.4861%, rgb(10 77 166) 54.151%, rgb(7 58 130) 91.514%);
+  --raw-gradient-newsletter-md: radial-gradient(ellipse 90% 90% at 88% 8%, rgb(241 245 254) 0%, rgb(241 245 254 / 0) 60%), radial-gradient(ellipse 80% 80% at 6% 50%, rgb(220 231 251) 0%, rgb(220 231 251 / 0) 55%), linear-gradient(158.53deg, rgb(143 181 247) 8.4861%, rgb(169 198 248) 45.849%, rgb(108 157 243) 91.514%);
+  /* Pricing 1024 (5934:2573): hero stops re-set for the 839px frame; card angles for 482×336 / 984×462. */
+  --raw-gradient-hero-pricing-md: linear-gradient(180deg, rgb(2 11 30) 0%, rgb(4 32 90) 20%, rgb(10 77 166) 42%, rgb(63 141 232) 62%, rgb(156 198 245) 74%, rgb(215 232 251) 84%, rgb(245 248 252) 94%);
+  --raw-gradient-calculator-md: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(169.42deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  --raw-gradient-booking-md: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(172.83deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  /* Pricing 768 (5934:9893): the hero goes back to the 1440 stops; card angles for 728×348 / 728×771
+     (Company's 728×738 CTA would be 164.8deg — one token serves both). */
+  --raw-gradient-calculator-sm: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(172.7deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  --raw-gradient-booking-sm: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(164.16deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  /* 768 frame (5934:10453): same stops, Figma angles for the 768 box ratios. */
+  --raw-gradient-dashboard-sm: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(165.95deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  --raw-gradient-recall-sm: radial-gradient(ellipse 90% 80% at 100% 0%, rgb(111 168 236 / 0.4) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(157.62deg, rgb(14 69 154) 7.735%, rgb(10 53 120) 58.453%, rgb(8 42 98) 92.265%);
+  --raw-gradient-bills-sm: radial-gradient(ellipse 90% 90% at 88% 8%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 60%), radial-gradient(ellipse 80% 80% at 6% 50%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(159.26deg, rgb(63 141 232) 8.4861%, rgb(47 116 208) 45.849%, rgb(10 77 166) 91.514%);
+  --raw-gradient-funds-sm: radial-gradient(ellipse 90% 90% at 80% 12%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 58%), radial-gradient(ellipse 70% 90% at 0% 60%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(169.6deg, rgb(63 141 232) 6.1733%, rgb(47 116 208) 41.235%, rgb(10 77 166) 93.827%);
+  --raw-gradient-overnight-sm: radial-gradient(ellipse 90% 90% at 92% 14%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 55%), radial-gradient(ellipse 80% 80% at 10% 38%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(149deg, rgb(63 141 232) 7.735%, rgb(47 116 208) 50%, rgb(10 77 166) 92.265%);
+  --raw-gradient-security-sm: linear-gradient(152.51deg, rgb(63 141 232) 8.4861%, rgb(10 77 166) 54.151%, rgb(7 58 130) 91.514%);
+  --raw-gradient-newsletter-sm: radial-gradient(ellipse 90% 90% at 88% 8%, rgb(241 245 254) 0%, rgb(241 245 254 / 0) 60%), radial-gradient(ellipse 80% 80% at 6% 50%, rgb(220 231 251) 0%, rgb(220 231 251 / 0) 55%), linear-gradient(149.33deg, rgb(143 181 247) 8.4861%, rgb(169 198 248) 45.849%, rgb(108 157 243) 91.514%);
+  /* 390 frame (5934:17765): same stops, Figma angles for the 390 box ratios. */
+  --raw-gradient-dashboard-xs: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(144.93deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  --raw-gradient-recall-xs: radial-gradient(ellipse 90% 80% at 100% 0%, rgb(111 168 236 / 0.4) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(162.65deg, rgb(14 69 154) 7.735%, rgb(10 53 120) 58.453%, rgb(8 42 98) 92.265%);
+  --raw-gradient-bills-xs: radial-gradient(ellipse 90% 90% at 88% 8%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 60%), radial-gradient(ellipse 80% 80% at 6% 50%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(154.4deg, rgb(63 141 232) 8.4861%, rgb(47 116 208) 45.849%, rgb(10 77 166) 91.514%);
+  --raw-gradient-funds-xs: radial-gradient(ellipse 90% 90% at 80% 12%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 58%), radial-gradient(ellipse 70% 90% at 0% 60%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(166.93deg, rgb(63 141 232) 6.1733%, rgb(47 116 208) 41.235%, rgb(10 77 166) 93.827%);
+  --raw-gradient-overnight-xs: radial-gradient(ellipse 90% 90% at 92% 14%, rgb(141 186 240) 0%, rgb(141 186 240 / 0) 55%), radial-gradient(ellipse 80% 80% at 10% 38%, rgb(92 155 230) 0%, rgb(92 155 230 / 0) 55%), linear-gradient(142.77deg, rgb(63 141 232) 7.735%, rgb(47 116 208) 50%, rgb(10 77 166) 92.265%);
+  --raw-gradient-security-xs: linear-gradient(159.37deg, rgb(63 141 232) 8.4861%, rgb(10 77 166) 54.151%, rgb(7 58 130) 91.514%);
+  --raw-gradient-newsletter-xs: radial-gradient(ellipse 90% 90% at 88% 8%, rgb(241 245 254) 0%, rgb(241 245 254 / 0) 60%), radial-gradient(ellipse 80% 80% at 6% 50%, rgb(220 231 251) 0%, rgb(220 231 251 / 0) 55%), linear-gradient(169.87deg, rgb(143 181 247) 8.4861%, rgb(169 198 248) 45.849%, rgb(108 157 243) 91.514%);
+  --raw-gradient-footer: linear-gradient(180deg, rgb(31 99 196) 0%, rgb(30 97 193) 6.4%, rgb(28 92 183) 12.8%, rgb(25 83 170) 19.2%, rgb(21 74 153) 25.6%, rgb(18 63 135) 32%, rgb(14 52 117) 38.4%, rgb(10 43 100) 44.8%, rgb(7 34 87) 51.2%, rgb(5 29 77) 57.6%, rgb(4 27 74) 64%, rgb(4 27 74) 100%);
+  --raw-gradient-wordmark-fade: linear-gradient(180deg, rgb(4 27 74 / 0) 12%, rgb(4 27 74 / 0.55) 55%, rgb(4 27 74 / 0.96) 100%);
+  /* Pricing frame (5842:2720) — the 820px hero, the calculator result card and the booking CTA. */
+  --raw-gradient-hero-pricing: linear-gradient(180deg, rgb(2 11 30) 0%, rgb(4 32 90) 14.49%, rgb(10 77 166) 28.98%, rgb(63 141 232) 41.765%, rgb(156 198 245) 52.846%, rgb(215 232 251) 63.074%, rgb(245 248 252) 75.007%);
+  --raw-gradient-calculator: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(173.67deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  --raw-gradient-booking: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(174.86deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  /* Company frame (5874:2777) — the "Live desk" panel over the hero photo. */
+  --raw-gradient-live-desk: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(175.62deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  /* Company 1024 frame (5934:2808) — same fill on the 904px-wide panel. */
+  --raw-gradient-live-desk-md: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(173.62deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+  /* Company 768 frame (5934:10128) — same fill on the 688px-wide panel. */
+  --raw-gradient-live-desk-sm: radial-gradient(ellipse 70% 90% at 0% 0%, rgb(111 168 236 / 0.42) 0%, rgb(111 168 236 / 0) 70%), linear-gradient(169.54deg, rgb(13 65 143) 7.735%, rgb(10 50 115) 54.226%, rgb(8 38 90) 92.265%);
+
+  /* 768 frame (5934:10453) type values — "Kelder/768/*". */
+  --raw-text-h1-md-sm: 3.5rem;
+  --raw-text-h2-md-sm: 2.5rem;
+  --raw-text-h2-md-line-height-sm: 2.5625rem; /* 41px — 40 × 1.03 */
+  --raw-text-h3-md-sm: 2rem;
+  --raw-text-h3-md-line-height-sm: 2.0625rem; /* 33px — 32 × 1.03 */
+  --raw-text-number-xl-md-sm: 5rem;
+  --raw-text-number-xl-md-line-height-sm: 4.5rem; /* 72px — 80 × 0.9 */
+  --raw-text-number-l-md-sm: 3.25rem;
+  --raw-text-number-m-md-sm: 2rem;
+  --raw-text-title-l-md-sm: 1.5rem;
+  --raw-text-title-l-md-line-height-sm: 1.6875rem; /* 27px — 24 × 1.12 */
+  --raw-text-title-m-sm: 1.25rem;
+  --raw-text-title-m-line-height-sm: 1.5rem; /* 24px — 20 × 1.2 */
+  --raw-text-body-l-sm: 1.125rem;
+  --raw-text-body-l-line-height-sm: 1.625rem; /* 26px — 18 × 1.45 */
+  --raw-text-body-m-sm: 1rem;
+  --raw-text-body-m-line-height-sm: 1.5rem;
+  --raw-text-mega-md-sm: 16.740794rem; /* 267.85px — Footer / 768 5934:17049 */
+
+  /* 390 frame (5934:17765) type values — "Kelder/390/*". */
+  --raw-text-h1-md-xs: 2.5rem;
+  --raw-text-h2-md-xs: 2rem;
+  --raw-text-h2-md-line-height-xs: 2.0625rem; /* 33px — 32 × 1.03 */
+  --raw-text-h3-md-xs: 1.75rem;
+  --raw-text-h3-md-line-height-xs: 1.8125rem; /* 29px — 28 × 1.03 */
+  --raw-text-number-xl-md-xs: 4rem;
+  --raw-text-number-xl-md-line-height-xs: 3.625rem; /* 58px — 64 × 0.9 */
+  --raw-text-number-l-md-xs: 2.75rem;
+  --raw-text-title-l-md-xs: 1.375rem;
+  --raw-text-title-l-md-line-height-xs: 1.5625rem; /* 25px — 22 × 1.12 */
+  --raw-text-mega-md-xs: 8.048431rem; /* 128.77px — Footer / 390 5934:24357 */
+
+  --raw-shadow-ring-white: 0 0 0 0.3125rem rgb(255 255 255 / 0.2);
+  --raw-shadow-ring-lime: 0 0 0 0.3125rem rgb(221 245 69 / 0.25);
+  --raw-shadow-ring-blue: 0 0 0 0.375rem rgb(63 141 232 / 0.35);
+  --raw-shadow-envelope: 0 0.125rem 0.25rem 0 rgb(8 38 90 / 0.12), 0 1.875rem 3.125rem -1.5rem rgb(8 38 90 / 0.45);
+  /* Card hover — a soft navy lift shadow under a light card. */
+
+  --raw-radius-xs: 0.375rem;   /* 6px — bars, small buttons */
+  --raw-radius-chart: 0.25rem; /* 4px — chart columns (company "How we work") */
+  --raw-radius-tile: 0.5rem;   /* 8px — media panels */
+  --raw-radius-control: 0.625rem; /* 10px — buttons, cells */
+  --raw-radius-panel: 0.875rem;   /* 14px — inner panels, inputs */
+  --raw-radius-card: 1.25rem;     /* 20px — cards */
+  --raw-radius-card-closed: 2rem; /* 32px — a dark block's corners before it opens up (OpenUp) */
+
+  --raw-duration-fast: 150ms;
+  --raw-duration-normal: 250ms;
+
+  /* Card tilt (scroll-scrubbed) — hero dashboard and OpenUp blocks: the resting look. */
+  --raw-tilt-perspective: 62.5rem; /* 1000px at 1440 */
+  --raw-tilt-angle: 20deg;
+  --raw-tilt-scale: 0.9;
+  --raw-tilt-angle-xs: 7deg;   /* 390: a gentler tilt keeps the card clear of the next section */
+  --raw-tilt-scale-xs: 0.94;
+  --raw-tilt-area-dim: 0.35;       /* chart area opacity 0.65 → 1 */
+  --raw-tilt-end-x: -0.75rem;      /* end dot glides in along the line's last rise */
+  --raw-tilt-end-y: 0.5rem;
+}
+
+/* ---------------------------------------------------------------------------
+   TIER 2 — SEMANTIC  (role names, no namespace prefix)
+   Purpose, not appearance. Always `var(--raw-*)` — never a literal.
+   This is the themeable layer: dark mode overrides happen HERE, which is why
+   these are separate from the @theme bindings below (see the note there).
+   Grammar: --<role>[-<variant>][-<state>]
+   --------------------------------------------------------------------------- */
+:root {
+  --background: var(--raw-color-white);
+  --foreground: var(--raw-color-neutral-900);
+
+  /* Kelder roles */
+  --page: var(--raw-color-mist-50);
+  --surface: var(--raw-color-white);
+  --surface-soft: var(--raw-color-mist-100);
+  --ink: var(--raw-color-ink-950);
+  --muted: var(--raw-color-slate-600);
+  --faint: var(--raw-color-slate-400);
+  --line: var(--raw-color-mist-200);
+  --line-dashed: var(--raw-color-mist-400);
+  --accent: var(--raw-color-blue-700);
+  --accent-strong: var(--raw-color-blue-500);
+  --chart-400: var(--raw-color-blue-400);
+  --chart-300: var(--raw-color-blue-300);
+  --chart-200: var(--raw-color-blue-200);
+  --chart-100: var(--raw-color-blue-100);
+  --marker: var(--raw-color-navy-800);
+  --highlight: var(--raw-color-lime-300);
+  --on-dark: var(--raw-color-white);
+  --on-dark-soft: var(--raw-color-sky-200);
+  --on-dark-muted: var(--raw-color-sky-300);
+  --wordmark: var(--raw-color-mist-200);
+  --navy-deep: var(--raw-color-navy-deep);
+  --blue-250: var(--raw-color-blue-250);
+  /* Security cube art (cube.svg): the right face's and the top face's edge strokes. */
+  --cube-side-edge: var(--raw-color-blue-600);
+  --envelope-edge: var(--raw-color-navy-800);
+  --cube-top-edge: var(--raw-color-blue-350);
+
+  --gradient-hero: var(--raw-gradient-hero);
+  --gradient-dashboard: var(--raw-gradient-dashboard);
+  --gradient-recall: var(--raw-gradient-recall);
+  --gradient-bills: var(--raw-gradient-bills);
+  --gradient-funds: var(--raw-gradient-funds);
+  --gradient-overnight: var(--raw-gradient-overnight);
+  --gradient-steps: var(--raw-gradient-steps);
+  --gradient-bar: var(--raw-gradient-bar);
+  --gradient-security: var(--raw-gradient-security);
+  --gradient-newsletter: var(--raw-gradient-newsletter);
+  --gradient-footer: var(--raw-gradient-footer);
+  --gradient-wordmark-fade: var(--raw-gradient-wordmark-fade);
+  --gradient-hero-pricing: var(--raw-gradient-hero-pricing);
+  --gradient-calculator: var(--raw-gradient-calculator);
+  --gradient-booking: var(--raw-gradient-booking);
+  --gradient-live-desk: var(--raw-gradient-live-desk);
+
+  --ring-white: var(--raw-shadow-ring-white);
+  --ring-lime: var(--raw-shadow-ring-lime);
+  --ring-blue: var(--raw-shadow-ring-blue);
+  --envelope-shadow: var(--raw-shadow-envelope);
+
+  --corner-xs: var(--raw-radius-xs);
+  --corner-chart: var(--raw-radius-chart);
+  --corner-tile: var(--raw-radius-tile);
+  --corner-control: var(--raw-radius-control);
+  --corner-panel: var(--raw-radius-panel);
+  --corner-card: var(--raw-radius-card);
+  --corner-card-closed: var(--raw-radius-card-closed);
+
+  --duration-fast: var(--raw-duration-fast);
+  --duration-normal: var(--raw-duration-normal);
+
+  --tilt-perspective: var(--raw-tilt-perspective);
+  --tilt-angle: var(--raw-tilt-angle);
+  --tilt-scale: var(--raw-tilt-scale);
+  --tilt-area-dim: var(--raw-tilt-area-dim);
+  --tilt-end-x: var(--raw-tilt-end-x);
+  --tilt-end-y: var(--raw-tilt-end-y);
+
+  /* Consent UI (cookie banner + preferences modal) — its own roles so it can be
+     dressed in the project's brand without touching the page theme. Re-point
+     these at the project's tokens when the site gets its palette — see
+     obsidian/frontend/components/common.md → "Brand the consent UI". */
+  --consent-surface: var(--surface);
+  --consent-text: var(--ink);
+  --consent-action: var(--ink);
+  --consent-action-text: var(--on-dark);
+  --consent-radius: var(--raw-radius-panel);
+  --consent-radius-control: var(--raw-radius-control);
+}
+
+/* 1024 frame — gradients keep Figma's look on the narrower boxes. */
+@media (width <= 1024px) {
+  :root {
+    --gradient-dashboard: var(--raw-gradient-dashboard-md);
+    --gradient-recall: var(--raw-gradient-recall-md);
+    --gradient-bills: var(--raw-gradient-bills-md);
+    --gradient-funds: var(--raw-gradient-funds-md);
+    --gradient-overnight: var(--raw-gradient-overnight-md);
+    --gradient-security: var(--raw-gradient-security-md);
+    --gradient-newsletter: var(--raw-gradient-newsletter-md);
+    --gradient-hero-pricing: var(--raw-gradient-hero-pricing-md);
+    --gradient-calculator: var(--raw-gradient-calculator-md);
+    --gradient-booking: var(--raw-gradient-booking-md);
+    --gradient-live-desk: var(--raw-gradient-live-desk-md);
+  }
+}
+
+/* 768 frame — gradients plus the "Kelder/768/*" type styles. The 1024 (-md)
+   names are re-pointed too, since `to-laptop:` classes also match here. */
+@media (width <= 768px) {
+  :root {
+    --gradient-dashboard: var(--raw-gradient-dashboard-sm);
+    --gradient-recall: var(--raw-gradient-recall-sm);
+    --gradient-bills: var(--raw-gradient-bills-sm);
+    --gradient-funds: var(--raw-gradient-funds-sm);
+    --gradient-overnight: var(--raw-gradient-overnight-sm);
+    --gradient-security: var(--raw-gradient-security-sm);
+    --gradient-newsletter: var(--raw-gradient-newsletter-sm);
+    --gradient-live-desk: var(--raw-gradient-live-desk-sm);
+    --gradient-hero-pricing: var(--raw-gradient-hero-pricing);
+    --gradient-calculator: var(--raw-gradient-calculator-sm);
+    --gradient-booking: var(--raw-gradient-booking-sm);
+
+    --text-h1-md: var(--raw-text-h1-md-sm);
+    --text-h2-md: var(--raw-text-h2-md-sm);
+    --text-h2-md--line-height: var(--raw-text-h2-md-line-height-sm);
+    --text-h3-md: var(--raw-text-h3-md-sm);
+    --text-h3-md--line-height: var(--raw-text-h3-md-line-height-sm);
+    --text-number-xl-md: var(--raw-text-number-xl-md-sm);
+    --text-number-xl-md--line-height: var(--raw-text-number-xl-md-line-height-sm);
+    --text-number-l-md: var(--raw-text-number-l-md-sm);
+    --text-number-m-md: var(--raw-text-number-m-md-sm);
+    --text-title-l-md: var(--raw-text-title-l-md-sm);
+    --text-title-l-md--line-height: var(--raw-text-title-l-md-line-height-sm);
+    --text-title-m: var(--raw-text-title-m-sm);
+    --text-title-m--line-height: var(--raw-text-title-m-line-height-sm);
+    --text-body-l: var(--raw-text-body-l-sm);
+    --text-body-l--line-height: var(--raw-text-body-l-line-height-sm);
+    --text-body-m: var(--raw-text-body-m-sm);
+    --text-body-m--line-height: var(--raw-text-body-m-line-height-sm);
+    --text-mega-md: var(--raw-text-mega-md-sm);
+  }
+}
+
+/* 390 frame — gradients plus the "Kelder/390/*" sizes that differ from 768. */
+@media (width <= 560px) {
+  :root {
+    --tilt-angle: var(--raw-tilt-angle-xs);
+    --tilt-scale: var(--raw-tilt-scale-xs);
+  }
+  :root {
+    --gradient-dashboard: var(--raw-gradient-dashboard-xs);
+    --gradient-recall: var(--raw-gradient-recall-xs);
+    --gradient-bills: var(--raw-gradient-bills-xs);
+    --gradient-funds: var(--raw-gradient-funds-xs);
+    --gradient-overnight: var(--raw-gradient-overnight-xs);
+    --gradient-security: var(--raw-gradient-security-xs);
+    --gradient-newsletter: var(--raw-gradient-newsletter-xs);
+
+    --text-h1-md: var(--raw-text-h1-md-xs);
+    --text-h2-md: var(--raw-text-h2-md-xs);
+    --text-h2-md--line-height: var(--raw-text-h2-md-line-height-xs);
+    --text-h3-md: var(--raw-text-h3-md-xs);
+    --text-h3-md--line-height: var(--raw-text-h3-md-line-height-xs);
+    --text-number-xl-md: var(--raw-text-number-xl-md-xs);
+    --text-number-xl-md--line-height: var(--raw-text-number-xl-md-line-height-xs);
+    --text-number-l-md: var(--raw-text-number-l-md-xs);
+    --text-title-l-md: var(--raw-text-title-l-md-xs);
+    --text-title-l-md--line-height: var(--raw-text-title-l-md-line-height-xs);
+    --text-mega-md: var(--raw-text-mega-md-xs);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--raw-color-neutral-950);
+    --foreground: var(--raw-color-neutral-100);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   THEME BINDINGS — map semantic tokens into Tailwind namespaces.
+   Every entry is exactly `--<tw-namespace>-<role>: var(--<role>)`.
+   `inline` is required: it inlines the var() into each utility, so the
+   dark-mode overrides on the Tier 2 tokens above cascade. Binding a literal
+   here instead would freeze the value and break theming.
+
+   Only these namespaces generate utilities (verified against tailwindcss
+   v4.3.3): --color-* --spacing-* --radius-* --leading-* --tracking-* --text-*
+   --font-* --ease-* --breakpoint-* --container-* --shadow-* --blur-* --animate-*
+   NOTE: there is NO --duration-* namespace in v4 — `duration-fast` compiles to
+   nothing. Durations stay Tier 2 only and are used as duration-[var(--duration-fast)].
+   --------------------------------------------------------------------------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-consent-surface: var(--consent-surface);
+  --color-consent-text: var(--consent-text);
+  --color-consent-action: var(--consent-action);
+  --color-consent-action-text: var(--consent-action-text);
+  --radius-consent: var(--consent-radius);
+  --radius-consent-control: var(--consent-radius-control);
+  --font-sans: var(--font-funnel);
+
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-soft: var(--surface-soft);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-line-dashed: var(--line-dashed);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-chart-400: var(--chart-400);
+  --color-chart-300: var(--chart-300);
+  --color-chart-200: var(--chart-200);
+  --color-chart-100: var(--chart-100);
+  --color-marker: var(--marker);
+  --color-highlight: var(--highlight);
+  --color-on-dark: var(--on-dark);
+  --color-on-dark-soft: var(--on-dark-soft);
+  --color-on-dark-muted: var(--on-dark-muted);
+  --color-wordmark: var(--wordmark);
+  --color-navy-deep: var(--navy-deep);
+  --color-blue-250: var(--blue-250);
+  --color-cube-side-edge: var(--cube-side-edge);
+  --color-envelope-edge: var(--envelope-edge);
+  --color-cube-top-edge: var(--cube-top-edge);
+
+  --radius-xs: var(--corner-xs);
+  --radius-chart: var(--corner-chart);
+  --radius-tile: var(--corner-tile);
+  --radius-control: var(--corner-control);
+  --radius-panel: var(--corner-panel);
+  --radius-card: var(--corner-card);
+
+  --shadow-ring-white: var(--ring-white);
+  --shadow-ring-lime: var(--ring-lime);
+  --shadow-ring-blue: var(--ring-blue);
+  --shadow-envelope: var(--envelope-shadow);
+
+
+  /* Leading floor for clipped TextEngine reveals — see
+     obsidian/frontend/text-engine.md → "Alignment & line-height". */
+  --leading-display: 1.1;
+
+  --ease-entrance: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Type scale. A plain @theme (not inline) so utilities read var(--text-*) and
+   the 768 frame can re-point them below. Literals are allowed here: these are
+   Tailwind theme values, not semantic roles. */
+@theme {
+  /* Kelder type scale — Figma text styles "Kelder/*" at the 1440 frame.
+     Figma renders line heights rounded to whole pixels, so fractional ones
+     are stored as the rounded rem value to keep block heights 1:1. */
+  --text-h1: 5.375rem;
+  --text-h1--line-height: 1;
+  --text-h1--letter-spacing: -0.04em;
+  --text-h2: 3.75rem;
+  --text-h2--line-height: 3.875rem; /* 62px — Figma rounds 60 × 1.03 */
+  --text-h2--letter-spacing: -0.035em;
+  --text-h3: 2.75rem;
+  --text-h3--line-height: 2.8125rem; /* 45px — 44 × 1.03 */
+  --text-h3--letter-spacing: -0.03em;
+  --text-number-xl: 7.75rem;
+  --text-number-xl--line-height: 7rem; /* 112px — 124 × 0.9 */
+  --text-number-xl--letter-spacing: -0.05em;
+  --text-number-l: 4.75rem;
+  --text-number-l--line-height: 1;
+  --text-number-l--letter-spacing: -0.04em;
+  --text-number-m: 2.75rem;
+  --text-number-m--line-height: 1;
+  --text-number-m--letter-spacing: -0.04em;
+  --text-title-l: 1.75rem;
+  --text-title-l--line-height: 1.9375rem; /* 31px — 28 × 1.12 */
+  --text-title-l--letter-spacing: -0.02em;
+  --text-title-m: 1.375rem;
+  --text-title-m--line-height: 1.625rem; /* 26px — 22 × 1.2 */
+  --text-title-m--letter-spacing: -0.015em;
+  --text-logo: 1.375rem;
+  --text-logo--line-height: 1.5;
+  --text-logo--letter-spacing: -0.02em;
+  --text-body-l: 1.25rem;
+  --text-body-l--line-height: 1.45;
+  --text-body-m: 1.0625rem;
+  --text-body-m--line-height: 1.625rem; /* 26px — 17 × 1.5 */
+  /* UI copy (buttons, inputs, footer links) — stays 17px in every frame. */
+  --text-ui: 1.0625rem;
+  --text-ui--line-height: 1.625rem;
+  /* Booking day numbers — Figma keeps them 22/26 in every frame. */
+  --text-day: 1.375rem;
+  --text-day--line-height: 1.625rem;
+  --text-day--letter-spacing: -0.015em;
+  --text-body-s: 0.875rem;
+  --text-body-s--line-height: 1.5;
+  /* 1024 frame (5934:3133) type styles "Kelder/1024/*". */
+  --text-h1-md: 4rem;
+  --text-h1-md--line-height: 1;
+  --text-h1-md--letter-spacing: -0.04em;
+  --text-h2-md: 3rem;
+  --text-h2-md--line-height: 3.0625rem; /* 49px — 48 × 1.03 */
+  --text-h2-md--letter-spacing: -0.035em;
+  --text-h3-md: 2.25rem;
+  --text-h3-md--line-height: 2.3125rem; /* 37px — 36 × 1.03 */
+  --text-h3-md--letter-spacing: -0.03em;
+  --text-number-xl-md: 6rem;
+  --text-number-xl-md--line-height: 5.375rem; /* 86px — 96 × 0.9 */
+  --text-number-xl-md--letter-spacing: -0.05em;
+  --text-number-l-md: 3.75rem;
+  --text-number-l-md--line-height: 1;
+  --text-number-l-md--letter-spacing: -0.04em;
+  --text-number-m-md: 2.25rem;
+  --text-number-m-md--line-height: 1;
+  --text-number-m-md--letter-spacing: -0.04em;
+  --text-title-l-md: 1.625rem;
+  --text-title-l-md--line-height: 1.8125rem; /* 29px — 26 × 1.12 */
+  --text-title-l-md--letter-spacing: -0.02em;
+  --text-mega-md: 22.619538rem; /* 361.91px — Footer / 1024 5934:9729 */
+  --text-mega-md--line-height: 0.816;
+  --text-mega-md--letter-spacing: -0.051em;
+  --text-mega: 32.182271rem; /* 514.92px — Footer 5728:863 */
+  --text-mega--line-height: 0.816;
+  --text-mega--letter-spacing: -0.051em;
+}
+
+/* No rubber-band past the ends (touch scroll is native): the canvas is the light
+   page colour, so a bounce showed a light gap under the dark footer and above
+   the dark header. */
+html {
+  overscroll-behavior-y: none;
+}
+
+body {
+  background: var(--page);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* `safe center`: a page taller than the viewport starts at the top instead of
+     being centred past the scroll origin (a long page — a privacy policy — lost
+     its back link and title above the top edge with plain `center`). One-screen
+     pages and the 404 stay centred. */
+  justify-content: safe center;
+  height: 100vh;
+  /* 100%, not 100vw: with a classic (Windows) scrollbar 100vw is 15px wider than the page. */
+  width: 100%;
+}
+
+@layer base {
+  /* Adaptive scaling grid — scales the root font-size with the viewport so a
+     rem-based layout stays proportional. Each breakpoint divides FONT_BASE
+     (16px) by the design base width its range was laid out at:
+       font-size: 16 * 100 / baseWidth  (vw)
+     Above 1920px the root stops growing.
+     Keep in sync with src/components/common/grid/grid.config.ts. */
+  /* Above 1920 the root holds at its 1920 size (21.333px): the content column (`px-page`,
+     85rem) stays centred and the full-width backgrounds widen on each side, so 4K / 32"
+     monitors don't blow the page up. */
+  html {
+    font-size: calc(1920px * 16 / 1440);
+    font-size: round(nearest, calc(1920px * 16 / 1440), 0.001px);
+  }
+
+  /* 1440 frame: every width up to 1920 scales it proportionally — 14.2px root at 1280,
+     16px at 1440, 21.333px at 1920. */
+  @media (max-width: 1920px) {
+    html {
+      font-size: calc(100vw * 16 / 1440);
+      font-size: round(nearest, calc(100vw * 16 / 1440), 0.001px); /* vw is computed as width × 0.01, so 100vw lands a hair under the width
+         and every box rounds down; round() snaps the root back to 16px at the frame. */
+    }
+  }
+
+  /* 1024 frame: its own layout (the `to-laptop:` variant), scaled from 1024. */
+  @media (max-width: 1024px) {
+    html {
+      font-size: calc(100vw * 16 / 1024);
+      font-size: round(nearest, calc(100vw * 16 / 1024), 0.001px);
+    }
+  }
+
+  /* 768 frame: its own layout (the `to-tablet:` variant), scaled from 768. */
+  @media (max-width: 768px) {
+    html {
+      font-size: calc(100vw * 16 / 768);
+      font-size: round(nearest, calc(100vw * 16 / 768), 0.001px);
+    }
+  }
+
+  /* 390 frame: its own layout (the `to-phone:` variant), scaled from 390. */
+  @media (max-width: 560px) {
+    html {
+      font-size: calc(100vw * 16 / 390);
+      font-size: round(nearest, calc(100vw * 16 / 390), 0.001px);
+    }
+  }
+
+  .scroll-layout,
+  .scroll-layout-content {
+    width: 100%;
+  }
+
+  /* Blocks mid open-up (rotateX toward the viewer) project wider than the
+     viewport; clip that so the page never scrolls sideways. `clip` is not a
+     scroll container, so sticky (footer reveal) and the rails keep working. */
+  .scroll-layout {
+    overflow-x: clip;
+  }
+}
+
+@layer utilities {
+}
+
+/* Figma dashed strokes are a 2/1 dash pattern ("dashPattern [2,1]") that
+   border-style: dashed cannot draw. Pair a border width with a direction and a
+   colour: `border-t dashes-x dash-line-dashed`, `border-l dashes-y dash-on-dark/50`. */
+/* Horizontal card rails (768 frame) draw their own scroll indicator. */
+/* Page gutter: 2.5rem while the page scales (≤1920, where 100% − 85rem never exceeds 5rem),
+   then the content column (85rem = 1813px) centred on wider screens, backgrounds full width. */
+@utility px-page {
+  padding-inline: max(2.5rem, calc((100% - 85rem) / 2));
+}
+
+/* The sticky header bar sits 1.25rem outside the content column, as at 1440. */
+@utility px-page-bar {
+  padding-inline: max(1.25rem, calc((100% - 87.5rem) / 2));
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility dash-* {
+  --dash-color: --value(--color-*, [color]);
+  --dash-color: --alpha(--value(--color-*, [color]) / calc(--modifier(integer) * 1%));
+}
+
+@utility dashes-x {
+  border-style: solid;
+  border-image: repeating-linear-gradient(to right, var(--dash-color) 0 0.125rem, transparent 0.125rem 0.1875rem) 1;
+}
+
+@utility dashes-y {
+  border-style: solid;
+  border-image: repeating-linear-gradient(to bottom, var(--dash-color) 0 0.125rem, transparent 0.125rem 0.1875rem) 1;
+}
+
+@layer components {
+}
+
+/* The consent banner is server-rendered (it paints with the page — it is the
+   phone's LCP element). Hidden before paint for a visitor who already chose
+   (`Cookie/consent-flag.ts`) and on the robot form, which has no visitor to
+   ask. Outside any layer and selector list on purpose. */
+html[data-consent] [data-cookie-banner],
+html:has(meta[name="x-robot-view"]) [data-cookie-banner] {
+  display: none;
+}
+
+/* Hero dashboard tilt (src/views/home/hero-dashboard-tilt.tsx). `--tilt-k` is the
+   remaining tilt, 1 at scrollY 0 → 0 when the card reaches the viewport middle;
+   the server paints k = 1 so there is no jump on hydration, the script then
+   writes k per frame on these three elements only (not inherited — no subtree
+   restyle) and `transform: none` once flat. motion on; the robot
+   form never gets the attributes. */
+@property --tilt-k {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-tilt="card"] {
+    transform-origin: 50% 0;
+    transform: perspective(var(--tilt-perspective)) rotateX(calc(var(--tilt-angle) * var(--tilt-k)))
+      scale(calc(1 - (1 - var(--tilt-scale)) * var(--tilt-k)));
+  }
+  [data-tilt="area"] {
+    opacity: calc(1 - var(--tilt-area-dim) * var(--tilt-k));
+  }
+  [data-tilt="end"] {
+    translate: calc(var(--tilt-end-x) * var(--tilt-k)) calc(var(--tilt-end-y) * var(--tilt-k));
+  }
+}
